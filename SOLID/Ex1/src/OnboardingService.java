@@ -1,47 +1,38 @@
 import java.util.*;
 
 public class OnboardingService {
-    private final FakeDb db;
 
-    public OnboardingService(FakeDb db) { this.db = db; }
+    private StudentRepo db;
+    private IdGenerator idGenerator;
+    public OnboardingService(StudentRepo db, IdGenerator idGenerator) { 
+        this.db =db;
+        this.idGenerator=idGenerator;
+     }
 
     // Intentionally violates SRP: parses + validates + creates ID + saves + prints.
     public void registerFromRawInput(String raw) {
         System.out.println("INPUT: " + raw);
 
-        Map<String,String> kv = new LinkedHashMap<>();
-        String[] parts = raw.split(";");
-        for (String p : parts) {
-            String[] t = p.split("=", 2);
-            if (t.length == 2) kv.put(t[0].trim(), t[1].trim());
-        }
-
+        Parser p= new Parser();
+        Map<String,String> kv =p.parse(raw);
         String name = kv.getOrDefault("name", "");
         String email = kv.getOrDefault("email", "");
         String phone = kv.getOrDefault("phone", "");
         String program = kv.getOrDefault("program", "");
 
-        // validation inline, printing inline
-        List<String> errors = new ArrayList<>();
-        if (name.isBlank()) errors.add("name is required");
-        if (email.isBlank() || !email.contains("@")) errors.add("email is invalid");
-        if (phone.isBlank() || !phone.chars().allMatch(Character::isDigit)) errors.add("phone is invalid");
-        if (!(program.equals("CSE") || program.equals("AI") || program.equals("SWE"))) errors.add("program is invalid");
-
-        if (!errors.isEmpty()) {
-            System.out.println("ERROR: cannot register");
-            for (String e : errors) System.out.println("- " + e);
+        
+        Validator valid = new Validator(name, email, phone, program);
+        if(!valid.isValid()){
+            ErrorHandler.handleError(valid.getErrors());
             return;
         }
 
-        String id = IdUtil.nextStudentId(db.count());
+        String id = idGenerator.next();
         StudentRecord rec = new StudentRecord(id, name, email, phone, program);
 
         db.save(rec);
+        RegistrationResult res = new RegistrationResult(rec, db.count());
+        res.printDetails();
 
-        System.out.println("OK: created student " + id);
-        System.out.println("Saved. Total students: " + db.count());
-        System.out.println("CONFIRMATION:");
-        System.out.println(rec);
     }
 }
