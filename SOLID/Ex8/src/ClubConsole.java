@@ -1,3 +1,6 @@
+import org.w3c.dom.events.Event;
+import org.w3c.dom.events.EventException;
+
 public class ClubConsole {
     private final BudgetLedger ledger;
     private final MinutesBook minutes;
@@ -8,14 +11,13 @@ public class ClubConsole {
     }
 
     public void run() {
-        ClubAdminTools treasurer = new TreasurerTool(ledger);
-        ClubAdminTools secretary = new SecretaryTool(minutes);
-        ClubAdminTools lead = new EventLeadTool(events);
-
+        Expenses treasurer = new TreasurerTool(ledger);
+        EventTiming secretary = new SecretaryTool(minutes);
+        EventManager lead = new EventLeadTool(events);
         treasurer.addIncome(5000, "sponsor");
         secretary.addMinutes("Meeting at 5pm");
         lead.createEvent("HackNight", 2000);
-
+        
         System.out.println("Summary: ledgerBalance=" + ledger.balanceInt() + ", minutes=" + minutes.count() + ", events=" + lead.getEventsCount());
     }
 }
