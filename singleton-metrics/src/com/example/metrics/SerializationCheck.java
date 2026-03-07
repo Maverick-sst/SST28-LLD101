@@ -1,4 +1,4 @@
-package com.example.metrics;
+
 
 import java.io.*;
 
@@ -30,7 +30,7 @@ public class SerializationCheck {
     }
 
     private static MetricsRegistry deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) { 
             return (MetricsRegistry) ois.readObject();
         }
     }
