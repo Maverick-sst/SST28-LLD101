@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public class OrderService {
     private final Map<String, PaymentGateway> gateways;
-
     public OrderService(Map<String, PaymentGateway> gateways) {
         this.gateways = Objects.requireNonNull(gateways, "gateways");
     }
